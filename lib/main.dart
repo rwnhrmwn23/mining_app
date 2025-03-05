@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:mining_app/screen/installation/installation_screen.dart';
+import 'feature/installation/presentation/pages/installation_screen.dart';
+import 'feature/installation/di/injection.dart' as di;
 
 void main() {
-  runApp(const MyApp());
+  di.init();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      title: 'Installation Wizard',
+      theme: ThemeData.dark(),
       home: InstallationScreen(),
     );
   }
