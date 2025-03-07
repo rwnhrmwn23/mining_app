@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'feature/installation/presentation/pages/installation_screen.dart';
-import 'feature/installation/di/injection.dart' as di;
+import 'core/di/injection.dart' as di;
 
 void main() {
   di.init();

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/utils/local_storage.dart';
 import '../../../../core/utils/utils.dart';
-import '../../di/injection.dart';
-import '../bloc/device/device_bloc.dart';
-import '../bloc/device/device_event.dart';
-import '../bloc/device/device_state.dart';
-import 'login_page.dart';
+import '../bloc/device_bloc.dart';
+import '../bloc/device_event.dart';
+import '../bloc/device_state.dart';
+import '../../../login/presentation/pages/login_page.dart';
 
 class InstallationScreen extends StatefulWidget {
   @override
@@ -114,7 +114,7 @@ class _InstallationScreenState extends State<InstallationScreen>
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 50),
                   Text(
                     'Your serial number',
                     style: TextStyle(

@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/utils/local_storage.dart';
-import '../../../domain/entities/device.dart';
-import '../../../domain/usecases/check_device_status.dart';
-import '../../../domain/usecases/register_device.dart';
+import 'package:injectable/injectable.dart';
+import '../../../../core/utils/local_storage.dart';
+import '../../domain/entities/device.dart';
+import '../../domain/usecases/check_device_status.dart';
+import '../../domain/usecases/register_device.dart';
 import 'device_event.dart';
 import 'device_state.dart';
 
+@lazySingleton
 class DeviceBloc extends Bloc<DeviceEvent, DeviceState> {
   final CheckDeviceStatus checkDeviceStatus;
   final RegisterDevice registerDevice;

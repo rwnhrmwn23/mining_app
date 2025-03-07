@@ -1,8 +1,11 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/device.dart';
 import '../../domain/repositories/device_repository.dart';
 import '../datasources/remote_device_datasource.dart';
 import '../models/device_model.dart';
 
+@LazySingleton(as: DeviceRepository)
 class DeviceRepositoryImpl implements DeviceRepository {
   final RemoteDeviceDataSource remoteDataSource;
 
