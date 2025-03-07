@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mining_app/feature/dashboard/presentation/pages/dashboard_page.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/login_responses.dart';
 import '../bloc/login_bloc.dart';
@@ -174,41 +175,49 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             SizedBox(height: 70),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundImage: user.imageUrl != null
-                      ? NetworkImage(user.imageUrl!)
-                      : AssetImage('assets/default_avatar.jpg') as ImageProvider, // Fallback image
-                  child: user.imageUrl == null
-                      ? Icon(Icons.person, size: 50) // Larger icon
-                      : null,
-                ),
-                SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user.name ?? 'Unknown',
-                      style: TextStyle(
-                        fontSize: 18, // Adjusted to match design
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => DashboardPage()),
+                );
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundImage: user.imageUrl != null
+                        ? NetworkImage(user.imageUrl!)
+                        : AssetImage('assets/default_avatar.jpg') as ImageProvider, // Fallback image
+                    child: user.imageUrl == null
+                        ? Icon(Icons.person, size: 50) // Larger icon
+                        : null,
+                  ),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.name ?? 'Unknown',
+                        style: TextStyle(
+                          fontSize: 18, // Adjusted to match design
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                    Text(
-                      user.roleName ?? 'Unknown Role',
-                      style: TextStyle(
-                        fontSize: 16, // Adjusted to match design
-                        color: Colors.grey,
+                      Text(
+                        user.roleName ?? 'Unknown Role',
+                        style: TextStyle(
+                          fontSize: 16, // Adjusted to match design
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              ],
+                    ],
+                  )
+                ],
+              ),
             ),
           ],
         ),

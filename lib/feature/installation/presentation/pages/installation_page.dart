@@ -8,12 +8,12 @@ import '../bloc/device_event.dart';
 import '../bloc/device_state.dart';
 import '../../../login/presentation/pages/login_page.dart';
 
-class InstallationScreen extends StatefulWidget {
+class InstallationPage extends StatefulWidget {
   @override
-  _InstallationScreenState createState() => _InstallationScreenState();
+  _InstallationPageState createState() => _InstallationPageState();
 }
 
-class _InstallationScreenState extends State<InstallationScreen>
+class _InstallationPageState extends State<InstallationPage>
     with SingleTickerProviderStateMixin {
   String? deviceId;
   late AnimationController _controller;

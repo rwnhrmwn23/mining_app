@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'feature/installation/presentation/pages/installation_screen.dart';
+
 import 'core/di/injection.dart' as di;
+import 'feature/installation/presentation/pages/installation_page.dart';
 
 void main() {
   di.init();
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Installation Wizard',
       theme: ThemeData.dark(),
-      home: InstallationScreen(),
+      home: InstallationPage(),
     );
   }
 }
