@@ -32,12 +32,13 @@ class RemoteLoginDataSourceImpl implements RemoteLoginDataSource {
       if (cookies != null) {
         final token = _extractTokenFromCookies(cookies);
         if (token != null) {
-          print('remote token2: $token');
           await cookieManager.saveToken(token);
         }
       }
 
       final data = jsonDecode(response.body);
+      final nik = data['data']['nik'];
+      await cookieManager.saveNik(nik);
       return LoginResponseModel.fromJson(data);
     } else if (response.statusCode == 400) {
       throw Exception('User not found');

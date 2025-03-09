@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/usecases/get_subjects.dart';
-import 'subject_event.dart';
-import 'subject_state.dart';
+import 'package:mining_app/feature/dashboard/presentation/bloc/subject/subject_event.dart';
+import 'package:mining_app/feature/dashboard/presentation/bloc/subject/subject_state.dart';
+import '../../../domain/usecases/get_subjects.dart';
 
 @lazySingleton
 class SubjectBloc extends Bloc<SubjectEvent, SubjectState> {

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/subject.dart';
+import '../../../domain/entities/subject.dart';
 
 abstract class SubjectState extends Equatable {
   const SubjectState();

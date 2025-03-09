@@ -5,7 +5,7 @@ import '../../../../core/network/api_client.dart';
 import '../models/device_model.dart';
 
 abstract class RemoteDeviceDataSource {
-  Future<DeviceModel?> checkDeviceStatus(String deviceId); // Updated to return a single DeviceModel or null
+  Future<DeviceModel?> checkDeviceStatus(String deviceId);
   Future<DeviceModel> registerDevice(DeviceModel device);
 }
 

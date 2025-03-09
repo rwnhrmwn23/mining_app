@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mining_app/core/storage/cookie_manager.dart';
 
 import '../../../../core/di/injection.dart';
-import '../bloc/subject_bloc.dart';
-import '../bloc/subject_event.dart';
-import '../bloc/subject_state.dart';
+import '../bloc/message/message_bloc.dart';
+import '../bloc/message/message_event.dart';
+import '../bloc/message/message_state.dart';
+import '../bloc/subject/subject_bloc.dart';
+import '../bloc/subject/subject_event.dart';
+import '../bloc/subject/subject_state.dart';
+import 'message_bubble.dart';
 
 class MessagePage extends StatefulWidget {
   final VoidCallback closeThisPage;
@@ -16,20 +21,38 @@ class MessagePage extends StatefulWidget {
 }
 
 class _MessagePageState extends State<MessagePage> {
+  final CookieManager _cookieManager = sl<CookieManager>();
+  late MessageBloc _messageBloc;
   late SubjectBloc _subjectBloc;
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
+  String _currentUserNik = "";
 
   @override
   void initState() {
     super.initState();
+    _messageBloc = sl<MessageBloc>()
+      ..add(const FetchMessages(
+        page: '1',
+        limit: '10',
+        sort: 'created_at,asc',
+        equipmentId: 'cc3df50b55',
+      ));
     _subjectBloc = sl<SubjectBloc>()..add(FetchSubjects());
+    _cookieManager.getNik().then((nik) {
+      setState(() {
+        _currentUserNik = nik ?? "";
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => _subjectBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _messageBloc),
+        BlocProvider.value(value: _subjectBloc),
+      ],
       child: Scaffold(
         backgroundColor: Color(0xFF2E2E35),
         body: Stack(
@@ -54,60 +77,67 @@ class _MessagePageState extends State<MessagePage> {
                         ],
                       ),
                       TextButton(
-                          onPressed: widget.closeThisPage,
-                          child: Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                            ),
-                            child: Text(
-                              'Back',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                          )),
+                        onPressed: widget.closeThisPage,
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                          ),
+                          child: Text(
+                            'Back',
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFC99D00),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.warning, color: Colors.white, size: 16),
-                            SizedBox(width: 4),
-                            Text(
-                              'RAHMAT (45678)',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: BlocBuilder<MessageBloc, MessageState>(
+                      builder: (context, messageState) {
+                        if (messageState is MessageLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (messageState is MessageLoaded) {
+                          final messages = messageState.messages.toList();
+                          if (messages.isEmpty) {
+                            return Center(
+                              child: Text(
+                                'No messages found',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            );
+                          }
+                          return ListView.builder(
+                              padding: EdgeInsets.only(bottom: 180),
+                              itemCount: messages.length,
+                              shrinkWrap: true,
+                              physics: AlwaysScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final message = messages[index];
+                                return MessageBubble(
+                                  senderName: message.senderName,
+                                  senderNik: message.senderNik,
+                                  message: message.message,
+                                  createdAt: message.createdAt.toIso8601String(),
+                                  currentUserNik: _currentUserNik,
+                                );
+                              },
+                            );
+                        } else if (messageState is MessageError) {
+                          return Center(
+                            child: Text(
+                              messageState.message,
+                              style: TextStyle(color: Colors.red),
                             ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Proses Blasting sedang berlangsung pastikan Anda berada pada area aman',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                        SizedBox(height: 4),
-                        Text('23 Nov 2024, 12:00',
-                            style:
-                                TextStyle(color: Colors.white70, fontSize: 12)),
-                      ],
+                          );
+                        }
+                        return SizedBox.shrink();
+                      },
                     ),
                   ),
                 ),
-                SizedBox(height: 8),
-                Expanded(child: SizedBox()),
               ],
             ),
             Positioned(
@@ -149,25 +179,25 @@ class _MessagePageState extends State<MessagePage> {
                         SizedBox(width: 8),
                         Expanded(
                           child: BlocBuilder<SubjectBloc, SubjectState>(
-                            builder: (context, state) {
-                              if (state is SubjectLoading) {
+                            builder: (context, subjectState) {
+                              if (subjectState is SubjectLoading) {
                                 return const Center(
                                     child: CircularProgressIndicator());
-                              } else if (state is SubjectLoaded) {
-                                final templates = state.subjects
+                              } else if (subjectState is SubjectLoaded) {
+                                final templates = subjectState.subjects
                                     .where((subject) =>
-                                        subject.isActive &&
-                                        subject.isForOperator &&
-                                        subject
-                                            .templateMessageOperator.isNotEmpty)
+                                subject.isActive &&
+                                    subject.isForOperator &&
+                                    subject
+                                        .templateMessageOperator.isNotEmpty)
                                     .map((subject) =>
-                                        subject.templateMessageOperator)
+                                subject.templateMessageOperator)
                                     .toList();
 
                                 final filteredTemplates = templates
                                     .where((template) => template
-                                        .toLowerCase()
-                                        .contains(_searchQuery))
+                                    .toLowerCase()
+                                    .contains(_searchQuery))
                                     .toList();
 
                                 return SingleChildScrollView(
@@ -175,14 +205,16 @@ class _MessagePageState extends State<MessagePage> {
                                   child: Row(
                                     children: filteredTemplates
                                         .map((template) =>
-                                            _buildCategoryButton(template))
+                                        _buildCategoryButton(template))
                                         .toList(),
                                   ),
                                 );
-                              } else if (state is SubjectError) {
+                              } else if (subjectState is SubjectError) {
                                 return Center(
-                                  child: Text(state.message,
-                                      style: TextStyle(color: Colors.red)),
+                                  child: Text(
+                                    subjectState.message,
+                                    style: TextStyle(color: Colors.red),
+                                  ),
                                 );
                               }
                               return SizedBox.shrink();
@@ -226,8 +258,7 @@ class _MessagePageState extends State<MessagePage> {
                             ),
                             label: Text(
                               "Send",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
+                              style: TextStyle(color: Colors.white, fontSize: 20),
                             ),
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.symmetric(
@@ -291,6 +322,7 @@ class _MessagePageState extends State<MessagePage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _messageBloc.close();
     _subjectBloc.close();
     super.dispose();
   }

@@ -12,6 +12,7 @@ class ApiClient {
   Future<http.Response> get(String url, {Map<String, String>? headers}) async {
     return await client.get(
       Uri.parse('$baseUrl$url'),
+      headers: headers,
     );
   }
 
