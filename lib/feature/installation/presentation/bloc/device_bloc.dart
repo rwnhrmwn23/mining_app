@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/utils/local_storage.dart';
+import '../../../../core/storage/local_storage.dart';
 import '../../domain/entities/device.dart';
 import '../../domain/usecases/check_device_status.dart';
 import '../../domain/usecases/register_device.dart';

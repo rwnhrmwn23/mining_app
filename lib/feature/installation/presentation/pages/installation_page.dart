@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
-import '../../../../core/utils/local_storage.dart';
+import '../../../../core/storage/local_storage.dart';
 import '../../../../core/utils/utils.dart';
 import '../bloc/device_bloc.dart';
 import '../bloc/device_event.dart';

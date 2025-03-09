@@ -1,6 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:mining_app/feature/dashboard/presentation/pages/message_page.dart';
+import 'package:mining_app/feature/dashboard/presentation/pages/popup_message_with_slider.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  bool showDetailMessage = false;
+
+  void _showDetailMessage() {
+    setState(() {
+      showDetailMessage = true;
+    });
+  }
+
+  void _hideDetailMessage() {
+    setState(() {
+      showDetailMessage = false;
+    });
+  }
+
+  void _showPopupMessage(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (context) {
+        return PopupMessageWithSlider(
+            onSlideRight: _showDetailMessage,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -419,6 +452,25 @@ class DashboardPage extends StatelessWidget {
               ],
             ),
           ),
+
+          if (showDetailMessage)
+            Positioned(
+              left: 0,
+              bottom: 80,
+              top: 0,
+              right: 0,
+              child: Container(
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height * 0.8,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                ),
+                child: MessagePage(
+                    closeThisPage: _hideDetailMessage,
+                ),
+              ),
+            ),
+
           Positioned(
             left: 0,
             bottom: 0,
@@ -463,7 +515,12 @@ class DashboardPage extends StatelessWidget {
                       SizedBox(width: 16),
                       Icon(Icons.insert_chart, color: Colors.white, size: 45),
                       SizedBox(width: 16),
-                      Image.asset('images/ic_messages.png', width: 45),
+                      GestureDetector(
+                        onTap: () {
+                          _showPopupMessage(context);
+                        },
+                        child: Image.asset('images/ic_messages.png', width: 45),
+                      ),
                       SizedBox(width: 16),
                       Container(
                         padding: EdgeInsets.all(6),

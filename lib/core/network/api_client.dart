@@ -9,15 +9,21 @@ class ApiClient {
 
   ApiClient(this.client);
 
-  Future<http.Response> get(String url) async {
-    return await client.get(Uri.parse(url));
+  Future<http.Response> get(String url, {Map<String, String>? headers}) async {
+    return await client.get(
+      Uri.parse('$baseUrl$url'),
+    );
   }
 
   Future<http.Response> post(String url, {Map<String, dynamic>? body}) async {
     return await client.post(
-      Uri.parse(url),
+      Uri.parse('$baseUrl$url'),
       headers: {'Content-Type': 'application/json'},
       body: body != null ? jsonEncode(body) : null,
     );
+  }
+
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    return client.send(request);
   }
 }

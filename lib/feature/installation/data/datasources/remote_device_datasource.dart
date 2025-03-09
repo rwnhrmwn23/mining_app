@@ -18,7 +18,7 @@ class RemoteDeviceDataSourceImpl implements RemoteDeviceDataSource {
   @override
   Future<DeviceModel?> checkDeviceStatus(String deviceId) async {
     final response = await client.get(
-      '${ApiClient.baseUrl}equipments/devices?id=$deviceId&limit=1000',
+      'equipments/devices?id=$deviceId&limit=1000',
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body)['data'] as List;
@@ -35,7 +35,7 @@ class RemoteDeviceDataSourceImpl implements RemoteDeviceDataSource {
   @override
   Future<DeviceModel> registerDevice(DeviceModel device) async {
     final response = await client.post(
-      '${ApiClient.baseUrl}equipments/devices',
+      'equipments/devices',
       body: device.toJson(),
     );
     if (response.statusCode == 201) {

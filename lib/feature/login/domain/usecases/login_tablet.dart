@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 
 import '../entities/login_responses.dart';
 import '../repositories/login_repository.dart';
+
 @lazySingleton
 class LoginTablet {
   final LoginRepository repository;

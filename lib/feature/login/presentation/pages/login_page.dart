@@ -190,9 +190,9 @@ class _LoginPageState extends State<LoginPage> {
                     radius: 35,
                     backgroundImage: user.imageUrl != null
                         ? NetworkImage(user.imageUrl!)
-                        : AssetImage('assets/default_avatar.jpg') as ImageProvider, // Fallback image
+                        : AssetImage('assets/default_avatar.jpg') as ImageProvider,
                     child: user.imageUrl == null
-                        ? Icon(Icons.person, size: 50) // Larger icon
+                        ? Icon(Icons.person, size: 50)
                         : null,
                   ),
                   SizedBox(width: 10),
@@ -202,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         user.name ?? 'Unknown',
                         style: TextStyle(
-                          fontSize: 18, // Adjusted to match design
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
@@ -210,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         user.roleName ?? 'Unknown Role',
                         style: TextStyle(
-                          fontSize: 16, // Adjusted to match design
+                          fontSize: 16,
                           color: Colors.grey,
                         ),
                       ),

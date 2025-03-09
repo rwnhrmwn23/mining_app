@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mining_app/feature/installation/presentation/pages/installation_page.dart';
 
 import 'core/di/injection.dart' as di;
-import 'feature/installation/presentation/pages/installation_page.dart';
 
 void main() {
   di.init();
