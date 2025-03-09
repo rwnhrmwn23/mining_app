@@ -31,8 +31,8 @@ class _MessagePageState extends State<MessagePage> {
   final ScrollController _scrollController = ScrollController();
   late MessageBloc _messageBloc;
   late SubjectBloc _subjectBloc;
-  TextEditingController _searchController = TextEditingController();
-  TextEditingController _messageController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
   String _searchQuery = "";
   String _currentUserNik = "";
 
@@ -178,12 +178,12 @@ class _MessagePageState extends State<MessagePage> {
       ],
       child: Builder(
         builder: (context) => Scaffold(
-          backgroundColor: Color(0xFF2E2E35),
+          backgroundColor: const Color(0xFF2E2E35),
           body: Stack(
             children: [
               Column(
                 children: [
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -193,7 +193,7 @@ class _MessagePageState extends State<MessagePage> {
                           children: [
                             Image.asset('images/ic_message.png', width: 30, height: 30),
                             const SizedBox(width: 8),
-                            Text(
+                            const Text(
                               "Messages",
                               style: TextStyle(color: Colors.white, fontSize: 25),
                             ),
@@ -202,9 +202,9 @@ class _MessagePageState extends State<MessagePage> {
                         TextButton(
                           onPressed: widget.closeThisPage,
                           child: Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(color: Colors.black),
-                            child: Text(
+                            padding: const EdgeInsets.all(16),
+                            decoration: const BoxDecoration(color: Colors.black),
+                            child: const Text(
                               'Back',
                               style: TextStyle(color: Colors.white, fontSize: 20),
                             ),
@@ -223,7 +223,7 @@ class _MessagePageState extends State<MessagePage> {
                               if (_scrollController.hasClients) {
                                 _scrollController.animateTo(
                                   _scrollController.position.maxScrollExtent,
-                                  duration: Duration(milliseconds: 300),
+                                  duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeOut,
                                 );
                               }
@@ -237,7 +237,7 @@ class _MessagePageState extends State<MessagePage> {
                             } else if (messageState is MessageLoaded) {
                               final messages = messageState.messages.toList();
                               if (messages.isEmpty) {
-                                return Center(
+                                return const Center(
                                   child: Text(
                                     'No messages found',
                                     style: TextStyle(color: Colors.white70),
@@ -246,10 +246,10 @@ class _MessagePageState extends State<MessagePage> {
                               }
                               return ListView.builder(
                                 controller: _scrollController,
-                                padding: EdgeInsets.only(bottom: 180),
+                                padding: const EdgeInsets.only(bottom: 180),
                                 itemCount: messages.length,
                                 shrinkWrap: true,
-                                physics: AlwaysScrollableScrollPhysics(),
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
                                   final message = messages[index];
                                   return MessageBubble(
@@ -265,11 +265,11 @@ class _MessagePageState extends State<MessagePage> {
                               return Center(
                                 child: Text(
                                   messageState.message,
-                                  style: TextStyle(color: Colors.red),
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               );
                             }
-                            return SizedBox.shrink();
+                            return const SizedBox.shrink();
                           },
                         ),
                       ),
@@ -282,24 +282,24 @@ class _MessagePageState extends State<MessagePage> {
                 bottom: 0,
                 right: 0,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  color: Color(0xFF2E2E35),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  color: const Color(0xFF2E2E35),
                   child: Column(
                     children: [
                       Row(
                         children: [
-                          Container(
+                          SizedBox(
                             width: 120,
                             child: TextField(
                               controller: _searchController,
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 hintText: 'Search',
-                                hintStyle: TextStyle(color: Color(0xFF9E9E9E)),
+                                hintStyle: const TextStyle(color: Color(0xFF9E9E9E)),
                                 filled: true,
                                 fillColor: Colors.white,
-                                suffixIcon: Icon(Icons.search, color: Colors.grey, size: 18),
-                                contentPadding: EdgeInsets.only(left: 8),
+                                suffixIcon: const Icon(Icons.search, color: Colors.grey, size: 18),
+                                contentPadding: const EdgeInsets.only(left: 8),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20),
                                   borderSide: BorderSide.none,
@@ -312,7 +312,7 @@ class _MessagePageState extends State<MessagePage> {
                               },
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: BlocBuilder<SubjectBloc, SubjectState>(
                               builder: (context, subjectState) {
@@ -343,26 +343,26 @@ class _MessagePageState extends State<MessagePage> {
                                   return Center(
                                     child: Text(
                                       subjectState.message,
-                                      style: TextStyle(color: Colors.red),
+                                      style: const TextStyle(color: Colors.red),
                                     ),
                                   );
                                 }
-                                return SizedBox.shrink();
+                                return const SizedBox.shrink();
                               },
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: _messageController,
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 hintText: 'Type a message...',
-                                hintStyle: TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
+                                hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
                                 filled: true,
                                 fillColor: Colors.white,
                                 border: OutlineInputBorder(
@@ -372,23 +372,23 @@ class _MessagePageState extends State<MessagePage> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () => _sendMessage(_messageController.text),
                             child: Container(
                               height: 60,
                               decoration: BoxDecoration(
-                                color: Color(0xFF1073FC),
+                                color: const Color(0xFF1073FC),
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Image.asset('images/ic_send.png', width: 24, height: 24),
-                                    SizedBox(width: 8),
-                                    Text(
+                                    const SizedBox(width: 8),
+                                    const Text(
                                       "Send",
                                       style: TextStyle(color: Colors.white, fontSize: 20),
                                     ),
@@ -397,18 +397,18 @@ class _MessagePageState extends State<MessagePage> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Container(
                             height: 60,
                             width: 90,
                             decoration: BoxDecoration(
-                              color: Color(0xFF1073FC),
+                              color: const Color(0xFF1073FC),
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: IconButton(
                               onPressed: () {},
                               icon: Image.asset('images/ic_mic.png', width: 24, height: 24),
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                             ),
                           ),
                         ],
@@ -426,19 +426,19 @@ class _MessagePageState extends State<MessagePage> {
 
   Widget _buildCategoryButton(String label) {
     return Padding(
-      padding: EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: 8),
       child: ElevatedButton(
         onPressed: () => _sendMessage(label),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFF1073FC),
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          backgroundColor: const Color(0xFF1073FC),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
         ),
         child: Text(
           label,
-          style: TextStyle(color: Colors.white, fontSize: 16),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
     );

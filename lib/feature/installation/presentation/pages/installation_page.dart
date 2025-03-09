@@ -147,7 +147,7 @@ class _InstallationPageState extends State<InstallationPage> {
   @override
   Widget build(BuildContext context) {
     if (deviceId == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -157,7 +157,7 @@ class _InstallationPageState extends State<InstallationPage> {
       child: Scaffold(
         body: Center(
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             width: 400,
             height: 300,
             decoration: BoxDecoration(
@@ -189,10 +189,10 @@ class _InstallationPageState extends State<InstallationPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset('images/download.png', width: 40, height: 40),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                        children: const [
                           Text(
                             'Installation Wizard',
                             style: TextStyle(
@@ -208,36 +208,36 @@ class _InstallationPageState extends State<InstallationPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 50),
-                  Text(
+                  const SizedBox(height: 50),
+                  const Text(
                     'Your serial number',
                     style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.black),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Container(
                     width: 300,
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Color(0xFFFAFDFD)),
+                      border: Border.all(color: const Color(0xFFFAFDFD)),
                       borderRadius: BorderRadius.circular(5),
-                      color: Color(0xFFD0D7DE),
+                      color: const Color(0xFFD0D7DE),
                     ),
                     child: Text(
                       deviceId.toString(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF646464)),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   if (!_showProgressBar)
                     Column(
-                      children: [
+                      children: const [
                         Text(
                           'Waiting for activation...',
                           style: TextStyle(fontSize: 12, color: Colors.blue),
@@ -252,19 +252,19 @@ class _InstallationPageState extends State<InstallationPage> {
                           value: _progressValue,
                           backgroundColor: Colors.grey[300],
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.blue),
+                              const AlwaysStoppedAnimation<Color>(Colors.blue),
                         ),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Text(
                           _progressValue == 0.0
                               ? 'Waiting...'
                               : '${(_progressValue * 100).toInt()}% Completed',
-                          style: TextStyle(fontSize: 12),
+                          style: const TextStyle(fontSize: 12),
                         ),
                       ],
                     ),
-                  Spacer(),
-                  Text(
+                  const Spacer(),
+                  const Text(
                     'Version 1.0.0',
                     style: TextStyle(fontSize: 10, color: Colors.grey),
                   ),

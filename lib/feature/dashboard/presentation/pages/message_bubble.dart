@@ -33,11 +33,11 @@ class _MessageBubbleState extends State<MessageBubble> {
     return Align(
       alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: 1000),
-        padding: EdgeInsets.all(16),
-        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+        constraints: const BoxConstraints(maxWidth: 1000),
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         decoration: BoxDecoration(
-          color: isCurrentUser ? Color(0xFF1073FC) : Color(0xFFC99D00),
+          color: isCurrentUser ? const Color(0xFF1073FC) : const Color(0xFFC99D00),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -49,8 +49,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                   ? MainAxisAlignment.end
                   : MainAxisAlignment.start,
               children: [
-                Icon(Icons.warning, color: Colors.white, size: 16),
-                SizedBox(width: 4),
+                const Icon(Icons.warning, color: Colors.white, size: 16),
+                const SizedBox(width: 4),
                 Flexible(
                   child: Text(
                     displayName,
@@ -64,23 +64,23 @@ class _MessageBubbleState extends State<MessageBubble> {
                 ),
               ],
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             ConstrainedBox(
-              constraints: BoxConstraints(
+              constraints: const BoxConstraints(
                 maxWidth: 1000 - 32,
               ),
               child: Text(
                 widget.message,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                 ),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               formatDateTime(widget.createdAt),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 12,
               ),

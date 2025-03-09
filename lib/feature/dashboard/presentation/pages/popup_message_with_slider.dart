@@ -79,7 +79,7 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
         child: Scaffold(
           body: Container(
             decoration: BoxDecoration(
-              color: Color(0xFF2E2E35),
+              color: const Color(0xFF2E2E35),
               borderRadius: BorderRadius.circular(30),
             ),
             child: Stack(
@@ -95,7 +95,7 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                           Image.asset('images/ic_message.png',
                               width: 30, height: 30),
                           const SizedBox(width: 8),
-                          Text(
+                          const Text(
                             "Message",
                             style: TextStyle(color: Colors.white, fontSize: 25),
                           ),
@@ -103,10 +103,10 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 20),
-                      padding: EdgeInsets.all(16),
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Color(0xFFC99D00),
+                        color: const Color(0xFFC99D00),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -114,11 +114,11 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.warning, color: Colors.white, size: 20),
-                              SizedBox(width: 8),
+                              const Icon(Icons.warning, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
                               Text(
                                 widget.name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                   fontSize: 16,
@@ -126,15 +126,15 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                               widget.message,
-                            style: TextStyle(color: Colors.white, fontSize: 18),
+                            style: const TextStyle(color: Colors.white, fontSize: 18),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             formatDateTime(widget.date),
-                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                            style: const TextStyle(color: Colors.white70, fontSize: 16),
                           ),
                         ],
                       ),
@@ -162,9 +162,9 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                     },
                     child: Container(
                       key: _sliderContainerKey,
-                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
                       decoration: BoxDecoration(
-                        color: Color(0xFFA7A7A7),
+                        color: const Color(0xFFA7A7A7),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: Stack(
@@ -186,11 +186,11 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                             ],
                           ),
                           AnimatedContainer(
-                            duration: Duration(milliseconds: 200),
+                            duration: const Duration(milliseconds: 200),
                             transform:
                             Matrix4.translationValues(sliderPosition, 0, 0),
                             child: Container(
-                              padding: EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               child: Image.asset(
                                 'images/ic_slider.png',
                                 width: sliderWidth,

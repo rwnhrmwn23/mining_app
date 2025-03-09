@@ -8,6 +8,8 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 import '../../../../core/network/api_client.dart';
 
 class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
@@ -164,7 +166,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('images/background_dashboard.png'),
                 fit: BoxFit.cover,
@@ -187,8 +189,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         Container(
                           width: 120,
                           height: 100,
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
                             color: Colors.black,
                           ),
                           child: Column(
@@ -196,8 +198,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             children: [
                               Image.asset('images/ic_speed.png',
                                   width: 40, height: 40),
-                              SizedBox(height: 8),
-                              Text(
+                              const SizedBox(height: 8),
+                              const Text(
                                 'Materials',
                                 style: TextStyle(
                                   fontSize: 15,
@@ -210,13 +212,13 @@ class _DashboardPageState extends State<DashboardPage> {
                         Container(
                           width: 90,
                           height: 100,
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
                             color: Colors.red,
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                            children: const [
                               Text(
                                 '75',
                                 textAlign: TextAlign.center,
@@ -243,12 +245,12 @@ class _DashboardPageState extends State<DashboardPage> {
                             Container(
                               width: 90,
                               height: 50,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.red,
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                                children: const [
                                   Text(
                                     'MAX',
                                     textAlign: TextAlign.center,
@@ -272,12 +274,12 @@ class _DashboardPageState extends State<DashboardPage> {
                             Container(
                               width: 90,
                               height: 50,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.blue,
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                                children: const [
                                   Text(
                                     'MIN',
                                     textAlign: TextAlign.center,
@@ -302,14 +304,14 @@ class _DashboardPageState extends State<DashboardPage> {
                         )
                       ],
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Container(
                           width: 120,
                           height: 100,
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
                             color: Colors.black,
                           ),
                           child: Column(
@@ -317,8 +319,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             children: [
                               Image.asset('images/ic_achievement.png',
                                   width: 40, height: 40),
-                              SizedBox(height: 8),
-                              Text(
+                              const SizedBox(height: 8),
+                              const Text(
                                 'Achievement',
                                 style: TextStyle(
                                   fontSize: 15,
@@ -331,7 +333,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         Container(
                           width: 180,
                           height: 100,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           decoration: BoxDecoration(
                             color: Colors.grey[600],
                           ),
@@ -339,7 +341,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
+                              const Text(
                                 '100/50 Ton',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -353,18 +355,18 @@ class _DashboardPageState extends State<DashboardPage> {
                                   Container(
                                     width: double.infinity,
                                     height: 40,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.black,
                                     ),
                                   ),
                                   Container(
                                     width: 90,
                                     height: 40,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.blue,
                                     ),
                                     alignment: Alignment.center,
-                                    child: Text(
+                                    child: const Text(
                                       '50%',
                                       textAlign: TextAlign.end,
                                       style: TextStyle(
@@ -381,14 +383,14 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Container(
                           width: 120,
                           height: 100,
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
                             color: Colors.black,
                           ),
                           child: Column(
@@ -396,8 +398,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             children: [
                               Image.asset('images/ic_coal.png',
                                   width: 40, height: 40),
-                              SizedBox(height: 8),
-                              Text(
+                              const SizedBox(height: 8),
+                              const Text(
                                 'Materials',
                                 style: TextStyle(
                                   fontSize: 15,
@@ -410,11 +412,11 @@ class _DashboardPageState extends State<DashboardPage> {
                         Container(
                           width: 180,
                           height: 100,
-                          padding: EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
                             color: Colors.grey[600],
                           ),
-                          child: Text(
+                          child: const Text(
                             'COALS',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -426,10 +428,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Container(
                       width: 300,
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Colors.grey[600],
                         borderRadius: BorderRadius.circular(6),
@@ -439,7 +441,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 'HAULING',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -447,13 +449,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                   fontSize: 30,
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Image.asset('images/ic_clock.png', width: 30),
-                                  SizedBox(width: 8),
-                                  Text(
+                                  const SizedBox(width: 8),
+                                  const Text(
                                     '02:00',
                                     style: TextStyle(
                                       color: Colors.white,
@@ -471,7 +473,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 Container(
                   width: 600,
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(6),
@@ -479,7 +481,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text(
+                      const Text(
                         'DSP-2',
                         style: TextStyle(
                           color: Colors.white,
@@ -508,8 +510,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           Row(
                             children: [
                               Image.asset('images/ic_clock.png', width: 30),
-                              SizedBox(width: 4),
-                              Text(
+                              const SizedBox(width: 4),
+                              const Text(
                                 '14m 42s',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -533,12 +535,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     Container(
                       width: 200,
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Color(0xFFFF7B1B),
+                        color: const Color(0xFFFF7B1B),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
+                      child: const Text(
                         'END ACTIVITY',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -547,10 +549,10 @@ class _DashboardPageState extends State<DashboardPage> {
                             fontWeight: FontWeight.bold),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Container(
                       width: 200,
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(6),
@@ -559,7 +561,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         onTap: () {
                           _showActivityDialog(context);
                         },
-                        child: Text(
+                        child: const Text(
                           'ACTIVITY',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -583,7 +585,7 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Container(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 0.8,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.black,
                 ),
                 child: MessagePage(
@@ -596,16 +598,16 @@ class _DashboardPageState extends State<DashboardPage> {
             bottom: 0,
             right: 0,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               color: Colors.grey[700],
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
                       color: Colors.red,
                     ),
-                    child: Text(
+                    child: const Text(
                       'EMERGENCY',
                       style: TextStyle(
                           color: Colors.white,
@@ -613,13 +615,13 @@ class _DashboardPageState extends State<DashboardPage> {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Center(
                       child: Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(color: Colors.red),
-                        child: Text(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(color: Colors.red),
+                        child: const Text(
                           'BREAKDOWN',
                           style: TextStyle(
                               color: Colors.white,
@@ -631,20 +633,20 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   Row(
                     children: [
-                      Icon(Icons.settings, color: Colors.white, size: 45),
-                      SizedBox(width: 16),
-                      Icon(Icons.insert_chart, color: Colors.white, size: 45),
-                      SizedBox(width: 16),
+                      const Icon(Icons.settings, color: Colors.white, size: 45),
+                      const SizedBox(width: 16),
+                      const Icon(Icons.insert_chart, color: Colors.white, size: 45),
+                      const SizedBox(width: 16),
                       GestureDetector(
                         onTap: () => {
                           _showDetailMessage()
                         },
                         child: Image.asset('images/ic_messages.png', width: 45),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Container(
-                        padding: EdgeInsets.all(6),
-                        decoration: BoxDecoration(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
                           color: Colors.blue,
                         ),
                         child: Image.asset('images/ic_menu.png', width: 60),
@@ -672,15 +674,15 @@ void _showActivityDialog(BuildContext context) {
         child: Container(
           width: 300,
           height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Color(0xFF2E2E35),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
                   color: Colors.black,
                 ),
                 child: Row(
@@ -688,10 +690,10 @@ void _showActivityDialog(BuildContext context) {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child:
-                          Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                          const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       'Choose Activity',
                       style: TextStyle(
                           color: Colors.white,
@@ -701,7 +703,7 @@ void _showActivityDialog(BuildContext context) {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Expanded(
                 child: ListView(
                   children: [
@@ -719,7 +721,7 @@ void _showActivityDialog(BuildContext context) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('$activity Clicked'),
-                            duration: Duration(seconds: 2),
+                            duration: const Duration(seconds: 2),
                           ),
                         );
                       },
@@ -727,7 +729,7 @@ void _showActivityDialog(BuildContext context) {
                         padding: const EdgeInsets.all(16),
                         child: Text(
                           activity,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                           ),

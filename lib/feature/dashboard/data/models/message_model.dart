@@ -4,7 +4,7 @@ import '../../domain/entities/message.dart';
 
 @injectable
 class MessageModel extends Message {
-  MessageModel({
+  const MessageModel({
     required String id,
     required String equipmentId,
     required String senderNik,

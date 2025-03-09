@@ -9,6 +9,8 @@ import '../bloc/login_event.dart';
 import '../bloc/login_state.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -52,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLoginScreen(BuildContext context, LoginState state) {
     return Center(
       child: Container(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         width: 400,
         height: 300,
         decoration: BoxDecoration(
@@ -62,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Login by Code',
               style: TextStyle(
                 fontSize: 24,
@@ -70,21 +72,21 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.black,
               ),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Enter your NIK',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: _nikController,
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 hintText: 'Enter NIK',
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: const TextStyle(color: Colors.black),
                 filled: true,
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
@@ -93,9 +95,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             if (state is LoginFailure)
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text(
                   "Can't find your NIK",
@@ -116,20 +118,20 @@ class _LoginPageState extends State<LoginPage> {
                   ));
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please enter NIK')),
+                    const SnackBar(content: Text('Please enter NIK')),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: state is LoginLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text(
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
                 'Submit',
                 style: TextStyle(
                   fontSize: 16,
@@ -156,15 +158,15 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
               child: Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 color: Colors.blue,
                 width: double.infinity,
-                child: Text(
+                child: const Text(
                   'Welcome Back',
                   style: TextStyle(
                     fontSize: 24,
@@ -175,12 +177,12 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            SizedBox(height: 70),
+            const SizedBox(height: 70),
             GestureDetector(
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => DashboardPage()),
+                  MaterialPageRoute(builder: (_) => const DashboardPage()),
                 );
               },
               child: Row(
@@ -191,18 +193,18 @@ class _LoginPageState extends State<LoginPage> {
                     radius: 35,
                     backgroundImage: user.imageUrl != null
                         ? NetworkImage(user.imageUrl!)
-                        : AssetImage('assets/default_avatar.jpg') as ImageProvider,
+                        : const AssetImage('assets/default_avatar.jpg') as ImageProvider,
                     child: user.imageUrl == null
-                        ? Icon(Icons.person, size: 50)
+                        ? const Icon(Icons.person, size: 50)
                         : null,
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         user.name ?? 'Unknown',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
@@ -210,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       Text(
                         user.roleName ?? 'Unknown Role',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.grey,
                         ),

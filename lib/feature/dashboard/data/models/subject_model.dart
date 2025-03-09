@@ -1,7 +1,7 @@
 import '../../domain/entities/subject.dart';
 
 class SubjectModel extends Subject {
-  SubjectModel({
+  const SubjectModel({
     required String id,
     required String name,
     required String categoryId,
