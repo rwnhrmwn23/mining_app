@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/utils.dart';
+
 class PopupMessageWithSlider extends StatefulWidget {
 
   final VoidCallback onSlideRight;
+  final String name;
+  final String message;
+  final String date;
 
   const PopupMessageWithSlider({
     Key? key,
-    required this.onSlideRight,
+    required this.onSlideRight, required this.name, required this.message, required this.date,
   }) : super(key: key);
 
   @override
@@ -112,7 +117,7 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                               Icon(Icons.warning, color: Colors.white, size: 20),
                               SizedBox(width: 8),
                               Text(
-                                'RAHMAT (45678)',
+                                widget.name,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -123,12 +128,12 @@ class _PopupWithSliderState extends State<PopupMessageWithSlider> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'Proses Blasting sedang berlangsung, pastikan Anda berada pada area aman.',
+                              widget.message,
                             style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
                           SizedBox(height: 8),
                           Text(
-                            '23 Nov 2024, 12:00',
+                            formatDateTime(widget.date),
                             style: TextStyle(color: Colors.white70, fontSize: 16),
                           ),
                         ],

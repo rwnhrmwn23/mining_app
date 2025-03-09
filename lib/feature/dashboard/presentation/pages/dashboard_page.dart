@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mining_app/feature/dashboard/presentation/pages/message_page.dart';
 import 'package:mining_app/feature/dashboard/presentation/pages/popup_message_with_slider.dart';
+import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -9,6 +12,26 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   bool showDetailMessage = false;
+
+  // Web Socket
+  late centrifuge.Client client;
+  late centrifuge.Subscription subscription;
+  final String unitId = 'cc3df50b55';
+  final String baseUrl = 'wss://wss.apps-madhani.com/connection/websocket';
+  final String channelPrefix = 'ws/fms-dev';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebSocket();
+  }
+
+  @override
+  void dispose() {
+    subscription.unsubscribe();
+    client.disconnect();
+    super.dispose();
+  }
 
   void _showDetailMessage() {
     setState(() {
@@ -22,16 +45,116 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  void _showPopupMessage(BuildContext context) {
+  void _showPopupMessage(
+    BuildContext context,
+    String name,
+    String message,
+    String date,
+  ) {
     showDialog(
       context: context,
       barrierColor: Colors.transparent,
       builder: (context) {
         return PopupMessageWithSlider(
-            onSlideRight: _showDetailMessage,
+          onSlideRight: _showDetailMessage,
+          name: name,
+          message: message,
+          date: date,
         );
       },
     );
+  }
+
+  void _initializeWebSocket() async {
+    try {
+      client = centrifuge.createClient(baseUrl);
+
+      client.connectStream.listen((event) {
+        print('WebSocket => Connected: ${event.client}, ${event.data}');
+        _subscribeToChannel();
+      });
+
+      client.errorStream.listen((event) {
+        print('WebSocket => Error: ${event.error}');
+      });
+
+      client.disconnectStream.listen((event) {
+        print(
+            'WebSocket => Disconnected: ${event.reason}, shouldReconnect: ${event.shouldReconnect}');
+        if (event.shouldReconnect) {
+          _subscribeToChannel();
+        }
+      });
+
+      client.publishStream.listen((event) {
+        print(
+            'WebSocket => New message received on channel ${event.channel}: ${event.data}');
+        if (event.channel ==
+            '$channelPrefix/monitoring/messages/equipments/$unitId') {
+          _handleShowNewMessage(event.data);
+        }
+      });
+
+      print('WebSocket => Connecting to $baseUrl...');
+      await client.connect();
+    } catch (e) {
+      print('WebSocket => Failed to initialize WebSocket: $e');
+    }
+  }
+
+  void _subscribeToChannel() {
+    try {
+      final channel = '$channelPrefix/monitoring/messages/equipments/$unitId';
+      print('WebSocket => Subscribing to channel: $channel');
+
+      // Dapatkan subscription
+      subscription = client.getSubscription(channel);
+
+      // Dengarkan event subscription
+      subscription.subscribeSuccessStream.listen((event) {
+        print('WebSocket => Subscribed to channel: $channel');
+      });
+
+      subscription.unsubscribeStream.listen((event) {
+        print('WebSocket => Unsubscribed from channel: $channel');
+      });
+
+      subscription.publishStream.listen((event) {
+        print('WebSocket => New publication on channel data: ${event.data}');
+        _handleShowNewMessage(event.data);
+      });
+
+      // Mulai subscribe
+      subscription.subscribe();
+    } catch (e) {
+      print('WebSocket => Failed to subscribe: $e');
+    }
+  }
+
+  void _handleShowNewMessage(List<int> data) {
+    print('WebSocket => Raw data received: $data');
+    try {
+      final rawString = utf8.decode(data);
+      print('WebSocket => Decoded string: $rawString');
+
+      final jsonData = jsonDecode(rawString) as Map<String, dynamic>;
+      print('WebSocket => Parsed JSON: $jsonData');
+
+      var senderName = jsonData['sender_name'] != null && jsonData['sender_name'].isNotEmpty
+              ? jsonData['sender_name'] : jsonData['sender_nik'];
+      var message = jsonData['message'];
+      var createdAt = jsonData['created_at'];
+      if (jsonData.isNotEmpty && showDetailMessage == false) {
+        _showPopupMessage(
+          context,
+          senderName,
+          message,
+          createdAt,
+        );
+      }
+    } catch (e) {
+      print('WebSocket => Error processing message: $e');
+    }
   }
 
   @override
@@ -61,125 +184,125 @@ class _DashboardPageState extends State<DashboardPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 100,
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset('images/ic_speed.png',
-                                width: 40, height: 40),
-                            SizedBox(height: 8),
-                            Text(
-                              'Materials',
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.white,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Container(
-                        width: 90,
-                        height: 100,
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '75',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'km/h',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Container(
-                            width: 90,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'MAX',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                Text(
-                                  '70',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              ],
-                            ),
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 100,
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
                           ),
-                          Container(
-                            width: 90,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'MIN',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset('images/ic_speed.png',
+                                  width: 40, height: 40),
+                              SizedBox(height: 8),
+                              Text(
+                                'Materials',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white,
                                 ),
-                                Text(
-                                  '35',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              )
+                            ],
                           ),
-                        ],
-                      )
-                    ],
-                  ),
+                        ),
+                        Container(
+                          width: 90,
+                          height: 100,
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '75',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 30,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'km/h',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              width: 90,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'MAX',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  Text(
+                                    '70',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: 90,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'MIN',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  Text(
+                                    '35',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                     SizedBox(height: 16),
                     Row(
                       children: [
@@ -452,7 +575,6 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
           ),
-
           if (showDetailMessage)
             Positioned(
               left: 0,
@@ -466,11 +588,10 @@ class _DashboardPageState extends State<DashboardPage> {
                   color: Colors.black,
                 ),
                 child: MessagePage(
-                    closeThisPage: _hideDetailMessage,
+                  closeThisPage: _hideDetailMessage,
                 ),
               ),
             ),
-
           Positioned(
             left: 0,
             bottom: 0,
@@ -516,8 +637,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       Icon(Icons.insert_chart, color: Colors.white, size: 45),
                       SizedBox(width: 16),
                       GestureDetector(
-                        onTap: () {
-                          _showPopupMessage(context);
+                        onTap: () => {
+                          _showDetailMessage()
                         },
                         child: Image.asset('images/ic_messages.png', width: 45),
                       ),
@@ -567,7 +688,8 @@ void _showActivityDialog(BuildContext context) {
                   children: [
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                      child:
+                          Icon(Icons.arrow_back, color: Colors.white, size: 24),
                     ),
                     SizedBox(width: 10),
                     Text(

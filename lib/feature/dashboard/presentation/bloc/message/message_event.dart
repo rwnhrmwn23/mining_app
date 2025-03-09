@@ -1,10 +1,11 @@
 import 'package:equatable/equatable.dart';
+import '../../../domain/entities/message.dart';
 
 abstract class MessageEvent extends Equatable {
   const MessageEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class FetchMessages extends MessageEvent {
@@ -21,7 +22,7 @@ class FetchMessages extends MessageEvent {
   });
 
   @override
-  List<Object> get props => [page, limit, sort, equipmentId];
+  List<Object?> get props => [page, limit, sort, equipmentId];
 }
 
 class SendingMessage extends MessageEvent {
@@ -38,5 +39,14 @@ class SendingMessage extends MessageEvent {
   });
 
   @override
-  List<Object> get props => [message, deviceType, equipmentId, categoryId];
+  List<Object?> get props => [message, deviceType, equipmentId, categoryId];
+}
+
+class UpdateMessages extends MessageEvent {
+  final List<Message> messages;
+
+  const UpdateMessages(this.messages);
+
+  @override
+  List<Object?> get props => [messages];
 }

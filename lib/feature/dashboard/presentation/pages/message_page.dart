@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mining_app/core/storage/cookie_manager.dart';
+import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 import '../../../../core/di/injection.dart';
 import '../bloc/message/message_bloc.dart';
@@ -10,6 +13,8 @@ import '../bloc/subject/subject_bloc.dart';
 import '../bloc/subject/subject_event.dart';
 import '../bloc/subject/subject_state.dart';
 import 'message_bubble.dart';
+import '../../domain/entities/message.dart';
+import '../../data/models/message_model.dart';
 
 class MessagePage extends StatefulWidget {
   final VoidCallback closeThisPage;
@@ -30,9 +35,17 @@ class _MessagePageState extends State<MessagePage> {
   String _searchQuery = "";
   String _currentUserNik = "";
 
+  // Web Socket
+  late centrifuge.Client client;
+  late centrifuge.Subscription subscription;
+  final String unitId = 'cc3df50b55';
+  final String baseUrl = 'wss://wss.apps-madhani.com/connection/websocket';
+  final String channelPrefix = 'ws/fms-dev';
+
   @override
   void initState() {
     super.initState();
+    _initializeWebSocket();
     _messageBloc = sl<MessageBloc>()
       ..add(
         const FetchMessages(
@@ -64,13 +77,100 @@ class _MessagePageState extends State<MessagePage> {
     }
   }
 
+  void _initializeWebSocket() async {
+    try {
+      client = centrifuge.createClient(baseUrl); // Tanpa token
+
+      client.connectStream.listen((event) {
+        print('WebSocket => Connected: ${event.client}, ${event.data}');
+        _subscribeToChannel();
+      });
+
+      client.errorStream.listen((event) {
+        print('WebSocket => Error: ${event.error}');
+      });
+
+      client.disconnectStream.listen((event) {
+        print('WebSocket => Disconnected: ${event.reason}, shouldReconnect: ${event.shouldReconnect}');
+        if (event.shouldReconnect) {
+          _subscribeToChannel();
+        }
+      });
+
+      client.publishStream.listen((event) {
+        print('WebSocket => New message received on channel ${event.channel}: ${event.data}');
+        if (event.channel == '$channelPrefix/monitoring/messages/equipments/$unitId') {
+          _handleNewMessage(event.data);
+        }
+      });
+
+      print('WebSocket => Connecting to $baseUrl...');
+      await client.connect();
+    } catch (e) {
+      print('WebSocket => Failed to initialize WebSocket: $e');
+    }
+  }
+
+  void _subscribeToChannel() {
+    try {
+      final channel = '$channelPrefix/monitoring/messages/equipments/$unitId';
+      print('WebSocket => Subscribing to channel: $channel');
+
+      // Dapatkan subscription
+      subscription = client.getSubscription(channel);
+
+      // Dengarkan event subscription
+      subscription.subscribeSuccessStream.listen((event) {
+        print('WebSocket => Subscribed to channel: $channel');
+      });
+
+      subscription.unsubscribeStream.listen((event) {
+        print('WebSocket => Unsubscribed from channel: $channel');
+      });
+
+      subscription.publishStream.listen((event) {
+        print('WebSocket => New publication on channel data: ${event.data}');
+        _handleNewMessage(event.data);
+      });
+
+      // Mulai subscribe
+      subscription.subscribe();
+    } catch (e) {
+      print('WebSocket => Failed to subscribe: $e');
+    }
+  }
+
+  void _handleNewMessage(List<int> data) {
+    print('WebSocket => Raw data received: $data');
+    try {
+      final rawString = utf8.decode(data);
+      print('WebSocket => Decoded string: $rawString');
+
+      final jsonData = jsonDecode(rawString) as Map<String, dynamic>;
+      print('WebSocket => Parsed JSON: $jsonData');
+
+      final newMessage = MessageModel.fromJson(jsonData);
+      final currentState = _messageBloc.state;
+      if (currentState is MessageLoaded) {
+        final updatedMessages = List<Message>.from(currentState.messages)..add(newMessage);
+        _messageBloc.add(UpdateMessages(updatedMessages));
+      } else {
+        _messageBloc.add(UpdateMessages([newMessage]));
+      }
+    } catch (e) {
+      print('WebSocket => Error processing message: $e');
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
     _messageController.dispose();
-    _messageBloc.close();
+    // _messageBloc.close();
     _subjectBloc.close();
-    _scrollController.dispose(); // Dispose ScrollController
+    _scrollController.dispose();
+    subscription.unsubscribe(); // Unsubscribe dari channel
+    client.disconnect(); // Tutup koneksi WebSocket
     super.dispose();
   }
 
@@ -96,13 +196,11 @@ class _MessagePageState extends State<MessagePage> {
                       children: [
                         Row(
                           children: [
-                            Image.asset('images/ic_message.png',
-                                width: 30, height: 30),
+                            Image.asset('images/ic_message.png', width: 30, height: 30),
                             const SizedBox(width: 8),
                             Text(
                               "Messages",
-                              style:
-                              TextStyle(color: Colors.white, fontSize: 25),
+                              style: TextStyle(color: Colors.white, fontSize: 25),
                             ),
                           ],
                         ),
@@ -110,13 +208,10 @@ class _MessagePageState extends State<MessagePage> {
                           onPressed: widget.closeThisPage,
                           child: Container(
                             padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                            ),
+                            decoration: BoxDecoration(color: Colors.black),
                             child: Text(
                               'Back',
-                              style:
-                              TextStyle(color: Colors.white, fontSize: 20),
+                              style: TextStyle(color: Colors.white, fontSize: 20),
                             ),
                           ),
                         ),
@@ -143,9 +238,7 @@ class _MessagePageState extends State<MessagePage> {
                         child: BlocBuilder<MessageBloc, MessageState>(
                           builder: (context, messageState) {
                             if (messageState is MessageLoading) {
-                              // return const Center(
-                              //     child: CircularProgressIndicator(),
-                              // );
+                              return const Center(child: CircularProgressIndicator());
                             } else if (messageState is MessageLoaded) {
                               final messages = messageState.messages.toList();
                               if (messages.isEmpty) {
@@ -157,7 +250,7 @@ class _MessagePageState extends State<MessagePage> {
                                 );
                               }
                               return ListView.builder(
-                                controller: _scrollController, // Tambahkan ScrollController
+                                controller: _scrollController,
                                 padding: EdgeInsets.only(bottom: 180),
                                 itemCount: messages.length,
                                 shrinkWrap: true,
@@ -210,8 +303,7 @@ class _MessagePageState extends State<MessagePage> {
                                 hintStyle: TextStyle(color: Color(0xFF9E9E9E)),
                                 filled: true,
                                 fillColor: Colors.white,
-                                suffixIcon: Icon(Icons.search,
-                                    color: Colors.grey, size: 18),
+                                suffixIcon: Icon(Icons.search, color: Colors.grey, size: 18),
                                 contentPadding: EdgeInsets.only(left: 8),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20),
@@ -230,31 +322,25 @@ class _MessagePageState extends State<MessagePage> {
                             child: BlocBuilder<SubjectBloc, SubjectState>(
                               builder: (context, subjectState) {
                                 if (subjectState is SubjectLoading) {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
+                                  return const Center(child: CircularProgressIndicator());
                                 } else if (subjectState is SubjectLoaded) {
                                   final templates = subjectState.subjects
                                       .where((subject) =>
                                   subject.isActive &&
                                       subject.isForOperator &&
-                                      subject.templateMessageOperator
-                                          .isNotEmpty)
-                                      .map((subject) =>
-                                  subject.templateMessageOperator)
+                                      subject.templateMessageOperator.isNotEmpty)
+                                      .map((subject) => subject.templateMessageOperator)
                                       .toList();
 
                                   final filteredTemplates = templates
-                                      .where((template) => template
-                                      .toLowerCase()
-                                      .contains(_searchQuery))
+                                      .where((template) => template.toLowerCase().contains(_searchQuery))
                                       .toList();
 
                                   return SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
                                       children: filteredTemplates
-                                          .map((template) =>
-                                          _buildCategoryButton(template))
+                                          .map((template) => _buildCategoryButton(template))
                                           .toList(),
                                     ),
                                   );
@@ -281,8 +367,7 @@ class _MessagePageState extends State<MessagePage> {
                               style: TextStyle(color: Colors.black),
                               decoration: InputDecoration(
                                 hintText: 'Type a message...',
-                                hintStyle: TextStyle(
-                                    color: Color(0xFF9E9E9E), fontSize: 16),
+                                hintStyle: TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
                                 filled: true,
                                 fillColor: Colors.white,
                                 border: OutlineInputBorder(
@@ -302,21 +387,15 @@ class _MessagePageState extends State<MessagePage> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Image.asset(
-                                      'images/ic_send.png',
-                                      width: 24,
-                                      height: 24,
-                                    ),
+                                    Image.asset('images/ic_send.png', width: 24, height: 24),
                                     SizedBox(width: 8),
                                     Text(
                                       "Send",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 20),
+                                      style: TextStyle(color: Colors.white, fontSize: 20),
                                     ),
                                   ],
                                 ),
@@ -333,11 +412,7 @@ class _MessagePageState extends State<MessagePage> {
                             ),
                             child: IconButton(
                               onPressed: () {},
-                              icon: Image.asset(
-                                'images/ic_mic.png',
-                                width: 24,
-                                height: 24,
-                              ),
+                              icon: Image.asset('images/ic_mic.png', width: 24, height: 24),
                               padding: EdgeInsets.all(15),
                             ),
                           ),
