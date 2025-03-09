@@ -23,3 +23,20 @@ class FetchMessages extends MessageEvent {
   @override
   List<Object> get props => [page, limit, sort, equipmentId];
 }
+
+class SendingMessage extends MessageEvent {
+  final String message;
+  final String deviceType;
+  final String equipmentId;
+  final String categoryId;
+
+  const SendingMessage({
+    required this.message,
+    required this.deviceType,
+    required this.equipmentId,
+    required this.categoryId,
+  });
+
+  @override
+  List<Object> get props => [message, deviceType, equipmentId, categoryId];
+}

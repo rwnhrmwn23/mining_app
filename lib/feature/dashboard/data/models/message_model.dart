@@ -37,21 +37,24 @@ class MessageModel extends Message {
   );
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
+    // Untuk sendMessage, ambil dari json['data'], untuk getMessages ambil langsung dari json
+    final data = json['data'] != null ? json['data'] as Map<String, dynamic> : json;
+
     return MessageModel(
-      id: json['id'] as String,
-      equipmentId: json['equipment_id'] as String,
-      senderNik: json['sender_nik'] as String,
-      isRead: json['is_read'] as bool,
-      message: json['message'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      senderName: json['sender_name'] as String?,
-      deviceType: json['device_type'] as String,
-      categoryId: json['category_id'] as String,
-      equipmentCode: json['equipment_code'] as String,
-      fleetId: json['fleet_id'] as String?,
-      equipmentSiteId: json['equipment_site_id'] as String,
-      categoryName: json['category_name'] as String,
+      id: data['id'] as String,
+      equipmentId: data['equipment_id'] as String,
+      senderNik: data['sender_nik'] as String,
+      isRead: data['is_read'] as bool,
+      message: data['message'] as String,
+      createdAt: DateTime.parse(data['created_at'] as String),
+      updatedAt: DateTime.parse(data['updated_at'] as String),
+      senderName: data['sender_name'] as String?,
+      deviceType: data['device_type'] as String,
+      categoryId: data['category_id'] as String,
+      equipmentCode: data['equipment_code'] as String,
+      fleetId: data['fleet_id'] as String?,
+      equipmentSiteId: data['equipment_site_id'] as String,
+      categoryName: data['category_name'] as String,
     );
   }
 

@@ -24,4 +24,20 @@ class MessageRepositoryImpl implements MessageRepository {
     );
     return messages.map((model) => model).toList();
   }
+
+  @override
+  Future<Message> sendMessage({
+    required String message,
+      required String deviceType,
+      required String equipmentId,
+      required String categoryId
+  }) async  {
+    final sendMessage = await dataSource.sendMessage(
+      message: message,
+      deviceType: deviceType,
+      equipmentId: equipmentId,
+      categoryId: categoryId,
+    );
+    return sendMessage;
+  }
 }

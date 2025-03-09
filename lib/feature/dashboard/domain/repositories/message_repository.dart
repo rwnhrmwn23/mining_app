@@ -7,4 +7,11 @@ abstract class MessageRepository {
     required String sort,
     required String equipmentId,
   });
+
+  Future<Message> sendMessage({
+    required String message,
+    required String deviceType,
+    required String equipmentId,
+    required String categoryId,
+  });
 }

@@ -6,7 +6,7 @@ abstract class MessageState extends Equatable {
   const MessageState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class MessageInitial extends MessageState {}
@@ -19,7 +19,7 @@ class MessageLoaded extends MessageState {
   const MessageLoaded(this.messages);
 
   @override
-  List<Object> get props => [messages];
+  List<Object?> get props => [messages];
 }
 
 class MessageError extends MessageState {
@@ -28,5 +28,25 @@ class MessageError extends MessageState {
   const MessageError(this.message);
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
+}
+
+class SentMessageLoading extends MessageState {}
+
+class SentMessageLoaded extends MessageState {
+  final Message message;
+
+  const SentMessageLoaded(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class SentMessageError extends MessageState {
+  final String message;
+
+  const SentMessageError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

@@ -22,9 +22,11 @@ class MessagePage extends StatefulWidget {
 
 class _MessagePageState extends State<MessagePage> {
   final CookieManager _cookieManager = sl<CookieManager>();
+  final ScrollController _scrollController = ScrollController();
   late MessageBloc _messageBloc;
   late SubjectBloc _subjectBloc;
   TextEditingController _searchController = TextEditingController();
+  TextEditingController _messageController = TextEditingController();
   String _searchQuery = "";
   String _currentUserNik = "";
 
@@ -32,18 +34,44 @@ class _MessagePageState extends State<MessagePage> {
   void initState() {
     super.initState();
     _messageBloc = sl<MessageBloc>()
-      ..add(const FetchMessages(
-        page: '1',
-        limit: '10',
-        sort: 'created_at,asc',
-        equipmentId: 'cc3df50b55',
-      ));
+      ..add(
+        const FetchMessages(
+          page: '1',
+          limit: '100',
+          sort: 'created_at,asc',
+          equipmentId: 'cc3df50b55',
+        ),
+      );
     _subjectBloc = sl<SubjectBloc>()..add(FetchSubjects());
     _cookieManager.getNik().then((nik) {
       setState(() {
         _currentUserNik = nik ?? "";
       });
     });
+  }
+
+  void _sendMessage(String text) {
+    if (text.trim().isNotEmpty) {
+      _messageBloc.add(
+        SendingMessage(
+          message: text.trim(),
+          equipmentId: 'cc3df50b55',
+          deviceType: 'Mobile',
+          categoryId: '1',
+        ),
+      );
+      _messageController.clear();
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _messageController.dispose();
+    _messageBloc.close();
+    _subjectBloc.close();
+    _scrollController.dispose(); // Dispose ScrollController
+    super.dispose();
   }
 
   @override
@@ -53,247 +81,274 @@ class _MessagePageState extends State<MessagePage> {
         BlocProvider.value(value: _messageBloc),
         BlocProvider.value(value: _subjectBloc),
       ],
-      child: Scaffold(
-        backgroundColor: Color(0xFF2E2E35),
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Builder(
+        builder: (context) => Scaffold(
+          backgroundColor: Color(0xFF2E2E35),
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Image.asset('images/ic_message.png',
+                                width: 30, height: 30),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Messages",
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 25),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: widget.closeThisPage,
+                          child: Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                            ),
+                            child: Text(
+                              'Back',
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: BlocListener<MessageBloc, MessageState>(
+                        listener: (context, state) {
+                          if (state is MessageLoaded) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (_scrollController.hasClients) {
+                                _scrollController.animateTo(
+                                  _scrollController.position.maxScrollExtent,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                );
+                              }
+                            });
+                          }
+                        },
+                        child: BlocBuilder<MessageBloc, MessageState>(
+                          builder: (context, messageState) {
+                            if (messageState is MessageLoading) {
+                              // return const Center(
+                              //     child: CircularProgressIndicator(),
+                              // );
+                            } else if (messageState is MessageLoaded) {
+                              final messages = messageState.messages.toList();
+                              if (messages.isEmpty) {
+                                return Center(
+                                  child: Text(
+                                    'No messages found',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                );
+                              }
+                              return ListView.builder(
+                                controller: _scrollController, // Tambahkan ScrollController
+                                padding: EdgeInsets.only(bottom: 180),
+                                itemCount: messages.length,
+                                shrinkWrap: true,
+                                physics: AlwaysScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final message = messages[index];
+                                  return MessageBubble(
+                                    senderName: message.senderName,
+                                    senderNik: message.senderNik,
+                                    message: message.message,
+                                    createdAt: message.createdAt.toIso8601String(),
+                                    currentUserNik: _currentUserNik,
+                                  );
+                                },
+                              );
+                            } else if (messageState is MessageError) {
+                              return Center(
+                                child: Text(
+                                  messageState.message,
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              );
+                            }
+                            return SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                left: 0,
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  color: Color(0xFF2E2E35),
+                  child: Column(
                     children: [
                       Row(
                         children: [
-                          Image.asset('images/ic_message.png',
-                              width: 30, height: 30),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Messages",
-                            style: TextStyle(color: Colors.white, fontSize: 25),
+                          Container(
+                            width: 120,
+                            child: TextField(
+                              controller: _searchController,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                hintText: 'Search',
+                                hintStyle: TextStyle(color: Color(0xFF9E9E9E)),
+                                filled: true,
+                                fillColor: Colors.white,
+                                suffixIcon: Icon(Icons.search,
+                                    color: Colors.grey, size: 18),
+                                contentPadding: EdgeInsets.only(left: 8),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value.toLowerCase();
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: BlocBuilder<SubjectBloc, SubjectState>(
+                              builder: (context, subjectState) {
+                                if (subjectState is SubjectLoading) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (subjectState is SubjectLoaded) {
+                                  final templates = subjectState.subjects
+                                      .where((subject) =>
+                                  subject.isActive &&
+                                      subject.isForOperator &&
+                                      subject.templateMessageOperator
+                                          .isNotEmpty)
+                                      .map((subject) =>
+                                  subject.templateMessageOperator)
+                                      .toList();
+
+                                  final filteredTemplates = templates
+                                      .where((template) => template
+                                      .toLowerCase()
+                                      .contains(_searchQuery))
+                                      .toList();
+
+                                  return SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: filteredTemplates
+                                          .map((template) =>
+                                          _buildCategoryButton(template))
+                                          .toList(),
+                                    ),
+                                  );
+                                } else if (subjectState is SubjectError) {
+                                  return Center(
+                                    child: Text(
+                                      subjectState.message,
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  );
+                                }
+                                return SizedBox.shrink();
+                              },
+                            ),
                           ),
                         ],
                       ),
-                      TextButton(
-                        onPressed: widget.closeThisPage,
-                        child: Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _messageController,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                hintText: 'Type a message...',
+                                hintStyle: TextStyle(
+                                    color: Color(0xFF9E9E9E), fontSize: 16),
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
                           ),
-                          child: Text(
-                            'Back',
-                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () => _sendMessage(_messageController.text),
+                            child: Container(
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Color(0xFF1073FC),
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Image.asset(
+                                      'images/ic_send.png',
+                                      width: 24,
+                                      height: 24,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Send",
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 20),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          SizedBox(width: 8),
+                          Container(
+                            height: 60,
+                            width: 90,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF1073FC),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                'images/ic_mic.png',
+                                width: 24,
+                                height: 24,
+                              ),
+                              padding: EdgeInsets.all(15),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: BlocBuilder<MessageBloc, MessageState>(
-                      builder: (context, messageState) {
-                        if (messageState is MessageLoading) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (messageState is MessageLoaded) {
-                          final messages = messageState.messages.toList();
-                          if (messages.isEmpty) {
-                            return Center(
-                              child: Text(
-                                'No messages found',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            );
-                          }
-                          return ListView.builder(
-                              padding: EdgeInsets.only(bottom: 180),
-                              itemCount: messages.length,
-                              shrinkWrap: true,
-                              physics: AlwaysScrollableScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                final message = messages[index];
-                                return MessageBubble(
-                                  senderName: message.senderName,
-                                  senderNik: message.senderNik,
-                                  message: message.message,
-                                  createdAt: message.createdAt.toIso8601String(),
-                                  currentUserNik: _currentUserNik,
-                                );
-                              },
-                            );
-                        } else if (messageState is MessageError) {
-                          return Center(
-                            child: Text(
-                              messageState.message,
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          );
-                        }
-                        return SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              left: 0,
-              bottom: 0,
-              right: 0,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                color: Color(0xFF2E2E35),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 120,
-                          child: TextField(
-                            controller: _searchController,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              hintText: 'Search',
-                              hintStyle: TextStyle(color: Color(0xFF9E9E9E)),
-                              filled: true,
-                              fillColor: Colors.white,
-                              suffixIcon: Icon(Icons.search,
-                                  color: Colors.grey, size: 18),
-                              contentPadding: EdgeInsets.only(left: 8),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                _searchQuery = value.toLowerCase();
-                              });
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: BlocBuilder<SubjectBloc, SubjectState>(
-                            builder: (context, subjectState) {
-                              if (subjectState is SubjectLoading) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else if (subjectState is SubjectLoaded) {
-                                final templates = subjectState.subjects
-                                    .where((subject) =>
-                                subject.isActive &&
-                                    subject.isForOperator &&
-                                    subject
-                                        .templateMessageOperator.isNotEmpty)
-                                    .map((subject) =>
-                                subject.templateMessageOperator)
-                                    .toList();
-
-                                final filteredTemplates = templates
-                                    .where((template) => template
-                                    .toLowerCase()
-                                    .contains(_searchQuery))
-                                    .toList();
-
-                                return SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: filteredTemplates
-                                        .map((template) =>
-                                        _buildCategoryButton(template))
-                                        .toList(),
-                                  ),
-                                );
-                              } else if (subjectState is SubjectError) {
-                                return Center(
-                                  child: Text(
-                                    subjectState.message,
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                );
-                              }
-                              return SizedBox.shrink();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              hintText: 'Type a message...',
-                              hintStyle: TextStyle(
-                                  color: Color(0xFF9E9E9E), fontSize: 16),
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Container(
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF1073FC),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: TextButton.icon(
-                            onPressed: () {},
-                            icon: Image.asset(
-                              'images/ic_send.png',
-                              width: 24,
-                              height: 24,
-                            ),
-                            label: Text(
-                              "Send",
-                              style: TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Container(
-                          height: 60,
-                          width: 90,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF1073FC),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: IconButton(
-                            onPressed: () {},
-                            icon: Image.asset(
-                              'images/ic_mic.png',
-                              width: 24,
-                              height: 24,
-                            ),
-                            padding: EdgeInsets.all(15),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -303,7 +358,7 @@ class _MessagePageState extends State<MessagePage> {
     return Padding(
       padding: EdgeInsets.only(right: 8),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () => _sendMessage(label),
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(0xFF1073FC),
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -317,13 +372,5 @@ class _MessagePageState extends State<MessagePage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _messageBloc.close();
-    _subjectBloc.close();
-    super.dispose();
   }
 }

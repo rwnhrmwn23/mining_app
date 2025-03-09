@@ -13,6 +13,13 @@ abstract class RemoteMessageDataSource {
     required String sort,
     required String equipmentId,
   });
+
+  Future<MessageModel> sendMessage({
+    required String message,
+    required String deviceType,
+    required String equipmentId,
+    required String categoryId,
+  });
 }
 
 @LazySingleton(as: RemoteMessageDataSource)
@@ -20,7 +27,8 @@ class RemoteMessageDataSourceImpl implements RemoteMessageDataSource {
   final ApiClient client;
   final CookieManager cookieManager;
 
-  RemoteMessageDataSourceImpl({required this.client, required this.cookieManager});
+  RemoteMessageDataSourceImpl(
+      {required this.client, required this.cookieManager});
 
   @override
   Future<List<MessageModel>> getMessages({
@@ -54,10 +62,55 @@ class RemoteMessageDataSourceImpl implements RemoteMessageDataSource {
       final List<dynamic> data = jsonResponse['data'] as List;
       return data.map((json) => MessageModel.fromJson(json)).toList();
     } else if (response.statusCode == 400) {
-      throw Exception('Messages not found: ${await response.stream.bytesToString()}');
+      throw Exception(
+          'Messages not found: ${await response.stream.bytesToString()}');
     }
 
     throw Exception(
         'Failed to fetch messages: ${response.statusCode} ${await response.stream.bytesToString()}');
+  }
+
+  @override
+  Future<MessageModel> sendMessage({
+    required String message,
+    required String deviceType,
+    required String equipmentId,
+    required String categoryId,
+  }) async {
+    final token = await cookieManager.getToken();
+
+    if (token == null) {
+      throw Exception('No token found. Please login first.');
+    }
+
+    final headers = {
+      'Cookie': 'refresh_token=$token; token=$token',
+      'Content-Type': 'application/json',
+    };
+
+    final Uri url = Uri.parse('${ApiClient.baseUrl}monitoring/messages');
+
+    final request = http.Request('POST', url);
+    request.headers.addAll(headers);
+    request.body = jsonEncode({
+      'message': message,
+      'device_type': deviceType,
+      'equipment_id': equipmentId,
+      'category_id': categoryId,
+    });
+
+    final http.StreamedResponse response = await client.send(request);
+
+    if (response.statusCode == 201) {
+      final String responseBody = await response.stream.bytesToString();
+      final Map<String, dynamic> jsonResponse = jsonDecode(responseBody);
+      return MessageModel.fromJson(jsonResponse);
+    } else if (response.statusCode == 400) {
+      final String responseBody = await response.stream.bytesToString();
+      throw Exception('Failed to send message: $responseBody');
+    }
+
+    throw Exception(
+        'Failed to send message: ${response.statusCode} ${await response.stream.bytesToString()}');
   }
 }
