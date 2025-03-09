@@ -6,6 +6,7 @@ import 'package:mining_app/core/storage/cookie_manager.dart';
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/network/api_client.dart';
 import '../bloc/message/message_bloc.dart';
 import '../bloc/message/message_event.dart';
 import '../bloc/message/message_state.dart';
@@ -35,12 +36,9 @@ class _MessagePageState extends State<MessagePage> {
   String _searchQuery = "";
   String _currentUserNik = "";
 
-  // Web Socket
   late centrifuge.Client client;
   late centrifuge.Subscription subscription;
-  final String unitId = 'cc3df50b55';
-  final String baseUrl = 'wss://wss.apps-madhani.com/connection/websocket';
-  final String channelPrefix = 'ws/fms-dev';
+  final String unitId = ApiClient.unitId;
 
   @override
   void initState() {
@@ -52,7 +50,7 @@ class _MessagePageState extends State<MessagePage> {
           page: '1',
           limit: '100',
           sort: 'created_at,asc',
-          equipmentId: 'cc3df50b55',
+          equipmentId: ApiClient.unitId,
         ),
       );
     _subjectBloc = sl<SubjectBloc>()..add(FetchSubjects());
@@ -68,7 +66,7 @@ class _MessagePageState extends State<MessagePage> {
       _messageBloc.add(
         SendingMessage(
           message: text.trim(),
-          equipmentId: 'cc3df50b55',
+          equipmentId: ApiClient.unitId,
           deviceType: 'Mobile',
           categoryId: '1',
         ),
@@ -79,7 +77,7 @@ class _MessagePageState extends State<MessagePage> {
 
   void _initializeWebSocket() async {
     try {
-      client = centrifuge.createClient(baseUrl); // Tanpa token
+      client = centrifuge.createClient(ApiClient.baseUrlWS);
 
       client.connectStream.listen((event) {
         print('WebSocket => Connected: ${event.client}, ${event.data}');
@@ -99,12 +97,12 @@ class _MessagePageState extends State<MessagePage> {
 
       client.publishStream.listen((event) {
         print('WebSocket => New message received on channel ${event.channel}: ${event.data}');
-        if (event.channel == '$channelPrefix/monitoring/messages/equipments/$unitId') {
+        if (event.channel == '${ApiClient.channelPrefix}/monitoring/messages/equipments/$unitId') {
           _handleNewMessage(event.data);
         }
       });
 
-      print('WebSocket => Connecting to $baseUrl...');
+      print('WebSocket => Connecting to ${ApiClient.baseUrlWS}...');
       await client.connect();
     } catch (e) {
       print('WebSocket => Failed to initialize WebSocket: $e');
@@ -113,13 +111,11 @@ class _MessagePageState extends State<MessagePage> {
 
   void _subscribeToChannel() {
     try {
-      final channel = '$channelPrefix/monitoring/messages/equipments/$unitId';
+      final channel = '${ApiClient.channelPrefix}/monitoring/messages/equipments/$unitId';
       print('WebSocket => Subscribing to channel: $channel');
 
-      // Dapatkan subscription
       subscription = client.getSubscription(channel);
 
-      // Dengarkan event subscription
       subscription.subscribeSuccessStream.listen((event) {
         print('WebSocket => Subscribed to channel: $channel');
       });
@@ -133,7 +129,6 @@ class _MessagePageState extends State<MessagePage> {
         _handleNewMessage(event.data);
       });
 
-      // Mulai subscribe
       subscription.subscribe();
     } catch (e) {
       print('WebSocket => Failed to subscribe: $e');
@@ -166,11 +161,11 @@ class _MessagePageState extends State<MessagePage> {
   void dispose() {
     _searchController.dispose();
     _messageController.dispose();
-    // _messageBloc.close();
+    _messageBloc.close();
     _subjectBloc.close();
     _scrollController.dispose();
-    subscription.unsubscribe(); // Unsubscribe dari channel
-    client.disconnect(); // Tutup koneksi WebSocket
+    subscription.unsubscribe();
+    client.disconnect();
     super.dispose();
   }
 

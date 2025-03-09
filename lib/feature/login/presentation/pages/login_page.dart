@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mining_app/core/network/api_client.dart';
 import 'package:mining_app/feature/dashboard/presentation/pages/dashboard_page.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/login_responses.dart';
@@ -14,7 +15,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _nikController = TextEditingController();
-  final _unitId = 'cc3df50b55';
+  final _unitId = ApiClient.unitId;
   final _shiftId = '048C-DS';
   final _loginType = 1;
 

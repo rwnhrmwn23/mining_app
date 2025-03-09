@@ -1,40 +1,121 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/local_storage.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../login/presentation/pages/login_page.dart';
 import '../bloc/device_bloc.dart';
 import '../bloc/device_event.dart';
 import '../bloc/device_state.dart';
-import '../../../login/presentation/pages/login_page.dart';
+import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 class InstallationPage extends StatefulWidget {
   @override
   _InstallationPageState createState() => _InstallationPageState();
 }
 
-class _InstallationPageState extends State<InstallationPage>
-    with SingleTickerProviderStateMixin {
+class _InstallationPageState extends State<InstallationPage> {
   String? deviceId;
-  late AnimationController _controller;
-  late Animation<double> _progressAnimation;
+  double _progressValue = 0.0;
+  bool _showProgressBar = true;
+
+  late centrifuge.Client client;
+  late centrifuge.Subscription subscription;
+  final String unitId = ApiClient.unitId;
+
 
   @override
   void initState() {
     super.initState();
-
     _loadDeviceId();
+  }
 
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 2500),
-      vsync: this,
-    );
-    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+  void _initializeWebSocket() async {
+    try {
+      client = centrifuge.createClient(ApiClient.baseUrlWS);
+
+      updateProgress(0.6);
+      print('WebSocket => Connecting to ${ApiClient.baseUrlWS}...');
+
+      client.connectStream.listen((event) {
+        print('WebSocket => Connected: ${event.client}, ${event.data}');
+        updateProgress(0.8);
+        _subscribeToChannel();
+      });
+
+      client.errorStream.listen((event) {
+        print('WebSocket => Error: ${event.error}');
+      });
+
+      client.disconnectStream.listen((event) {
+        print(
+            'WebSocket => Disconnected: ${event.reason}, shouldReconnect: ${event.shouldReconnect}');
+        if (event.shouldReconnect) {
+          _subscribeToChannel();
+        }
+      });
+
+      client.publishStream.listen((event) {
+        print(
+            'WebSocket => New message received on channel ${event.channel}: ${event.data}');
+        _handleNewMessage(event.data);
+      });
+
+      await client.connect();
+    } catch (e) {
+      print('WebSocket => Failed to initialize WebSocket: $e');
+    }
+  }
+
+  void _subscribeToChannel() {
+    try {
+      final channel = '${ApiClient.channelPrefix}/equipments/devices/$deviceId/activated';
+      print('WebSocket => Subscribing to channel: $channel');
+
+      subscription = client.getSubscription(channel);
+
+      subscription.subscribeSuccessStream.listen((event) {
+        print('WebSocket => Subscribed to channel: $channel');
+        updateProgress(1.0);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => LoginPage()),
+        );
+      });
+
+      subscription.unsubscribeStream.listen((event) {
+        print('WebSocket => Unsubscribed from channel: $channel');
+      });
+
+      subscription.publishStream.listen((event) {
+        print('WebSocket => New publication on channel data: ${event.data}');
+        _handleNewMessage(event.data);
+      });
+
+      subscription.subscribe();
+    } catch (e) {
+      print('WebSocket => Failed to subscribe: $e');
+    }
+  }
+
+  void _handleNewMessage(List<int> data) {
+    print('WebSocket => Raw data received: $data');
+    try {
+      final rawString = utf8.decode(data);
+      print('WebSocket => Decoded string: $rawString');
+
+      final jsonData = jsonDecode(rawString) as Map<String, dynamic>;
+      print('WebSocket => Parsed JSON: $jsonData');
+    } catch (e) {
+      print('WebSocket => Error processing message: $e');
+    }
   }
 
   Future<void> _loadDeviceId() async {
+    updateProgress(0.1);
     final savedDeviceId = await LocalStorage.getDeviceId();
     if (savedDeviceId != null) {
       setState(() {
@@ -50,9 +131,16 @@ class _InstallationPageState extends State<InstallationPage>
     print('deviceId: $deviceId');
   }
 
+  void updateProgress(double value) {
+    setState(() {
+      _progressValue = value.clamp(0.0, 1.0);
+    });
+  }
+
   @override
   void dispose() {
-    _controller.dispose();
+    subscription.unsubscribe();
+    client.disconnect();
     super.dispose();
   }
 
@@ -60,14 +148,12 @@ class _InstallationPageState extends State<InstallationPage>
   Widget build(BuildContext context) {
     if (deviceId == null) {
       return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
-
     return BlocProvider(
-      create: (_) => sl<DeviceBloc>()..add(CheckDeviceStatusEvent(deviceId.toString())),
+      create: (_) =>
+          sl<DeviceBloc>()..add(CheckDeviceStatusEvent(deviceId.toString())),
       child: Scaffold(
         body: Center(
           child: Container(
@@ -82,10 +168,18 @@ class _InstallationPageState extends State<InstallationPage>
             child: BlocListener<DeviceBloc, DeviceState>(
               listener: (context, state) {
                 if (state is DeviceActive) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => LoginPage()),
-                  );
+                  _initializeWebSocket();
+                } else if (state is DeviceLoading) {
+                  updateProgress(0.6);
+                } else if (state is DeviceWaitingActivation) {
+                  updateProgress(1.0);
+                  setState(() {
+                    _showProgressBar = false;
+                  });
+                  updateProgress(1.0);
+                } else if (state is DeviceError) {
+                  updateProgress(0.0);
+                  _showProgressBar = false;
                 }
               },
               child: Column(
@@ -103,8 +197,8 @@ class _InstallationPageState extends State<InstallationPage>
                             'Installation Wizard',
                             style: TextStyle(
                                 fontSize: 18,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
                           ),
                           Text(
                             'Device must be registered before it can be used',
@@ -118,10 +212,9 @@ class _InstallationPageState extends State<InstallationPage>
                   Text(
                     'Your serial number',
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
                   SizedBox(height: 10),
                   Container(
@@ -136,57 +229,40 @@ class _InstallationPageState extends State<InstallationPage>
                       deviceId.toString(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF646464),
-                      ),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF646464)),
                     ),
                   ),
                   SizedBox(height: 10),
-                  BlocBuilder<DeviceBloc, DeviceState>(
-                    builder: (context, state) {
-                      if (state is DeviceLoading) {
-                        _controller.reset();
-                        _controller.forward();
-                        return Column(
-                          children: [
-                            AnimatedBuilder(
-                              animation: _progressAnimation,
-                              builder: (context, child) {
-                                return LinearProgressIndicator(
-                                  value: _progressAnimation.value,
-                                  backgroundColor: Colors.grey[300],
-                                  valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.blue),
-                                );
-                              },
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Please wait',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        );
-                      } else if (state is DeviceWaitingActivation) {
-                        return Column(
-                          children: [
-                            Text(
-                              'Waiting for activation...',
-                              style: TextStyle(fontSize: 12, color: Colors.blue),
-                            ),
-                            SizedBox(height: 5),
-                          ],
-                        );
-                      } else if (state is DeviceError) {
-                        return Text(
-                          state.message,
-                          style: TextStyle(color: Colors.red, fontSize: 12),
-                        );
-                      }
-                      return SizedBox();
-                    },
-                  ),
+                  if (!_showProgressBar)
+                    Column(
+                      children: [
+                        Text(
+                          'Waiting for activation...',
+                          style: TextStyle(fontSize: 12, color: Colors.blue),
+                        ),
+                        SizedBox(height: 5),
+                      ],
+                    )
+                  else
+                    Column(
+                      children: [
+                        LinearProgressIndicator(
+                          value: _progressValue,
+                          backgroundColor: Colors.grey[300],
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.blue),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          _progressValue == 0.0
+                              ? 'Waiting...'
+                              : '${(_progressValue * 100).toInt()}% Completed',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   Spacer(),
                   Text(
                     'Version 1.0.0',

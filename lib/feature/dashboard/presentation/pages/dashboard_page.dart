@@ -5,6 +5,8 @@ import 'package:mining_app/feature/dashboard/presentation/pages/message_page.dar
 import 'package:mining_app/feature/dashboard/presentation/pages/popup_message_with_slider.dart';
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
+import '../../../../core/network/api_client.dart';
+
 class DashboardPage extends StatefulWidget {
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -16,7 +18,7 @@ class _DashboardPageState extends State<DashboardPage> {
   // Web Socket
   late centrifuge.Client client;
   late centrifuge.Subscription subscription;
-  final String unitId = 'cc3df50b55';
+  final String unitId = ApiClient.unitId;
   final String baseUrl = 'wss://wss.apps-madhani.com/connection/websocket';
   final String channelPrefix = 'ws/fms-dev';
 
@@ -107,10 +109,8 @@ class _DashboardPageState extends State<DashboardPage> {
       final channel = '$channelPrefix/monitoring/messages/equipments/$unitId';
       print('WebSocket => Subscribing to channel: $channel');
 
-      // Dapatkan subscription
       subscription = client.getSubscription(channel);
 
-      // Dengarkan event subscription
       subscription.subscribeSuccessStream.listen((event) {
         print('WebSocket => Subscribed to channel: $channel');
       });
@@ -124,7 +124,6 @@ class _DashboardPageState extends State<DashboardPage> {
         _handleShowNewMessage(event.data);
       });
 
-      // Mulai subscribe
       subscription.subscribe();
     } catch (e) {
       print('WebSocket => Failed to subscribe: $e');

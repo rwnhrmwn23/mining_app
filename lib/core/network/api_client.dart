@@ -6,6 +6,9 @@ import 'package:injectable/injectable.dart';
 class ApiClient {
   final http.Client client;
   static const String baseUrl = 'https://dev-api-fms.apps-madhani.com/v1/';
+  static const String baseUrlWS = 'wss://wss.apps-madhani.com/connection/websocket';
+  static const String channelPrefix = 'ws/fms-dev';
+  static const String unitId = 'a70998a2a2';
 
   ApiClient(this.client);
 

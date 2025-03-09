@@ -39,7 +39,6 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
         );
         emit(SentMessageLoaded(messages));
 
-        // After sending message, fetch updated messages
         await Future.delayed(const Duration(milliseconds: 500));
         add(FetchMessages(
           page: '1',

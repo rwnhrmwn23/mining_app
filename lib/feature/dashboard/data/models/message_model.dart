@@ -37,7 +37,6 @@ class MessageModel extends Message {
   );
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
-    // Untuk sendMessage, ambil dari json['data'], untuk getMessages ambil langsung dari json
     final data = json['data'] != null ? json['data'] as Map<String, dynamic> : json;
 
     return MessageModel(
